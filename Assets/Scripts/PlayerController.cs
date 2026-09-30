@@ -16,9 +16,12 @@ public class PlayerController : NetworkBehaviour
 
     private Rigidbody rb;
 
+    private AudioSource audioSource;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     public override void OnNetworkSpawn()
@@ -77,7 +80,7 @@ public class PlayerController : NetworkBehaviour
         // Control de la rotación
         if (moveDirection.sqrMagnitude != 0f)
         {
-            Quaternion rotationDirection = Quaternion.LookRotation(-moveDirection, Vector3.up);
+            Quaternion rotationDirection = Quaternion.LookRotation(moveDirection, Vector3.up);
             Quaternion targetRotation = Quaternion.RotateTowards(rb.rotation, rotationDirection, rotationSpeed * Time.fixedDeltaTime);
 
             rb.MoveRotation(targetRotation);
@@ -103,6 +106,7 @@ public class PlayerController : NetworkBehaviour
         if (tryiedToJump && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            InvokeSoundClientRpc();
         }
         tryiedToJump = false;
     }
@@ -119,5 +123,11 @@ public class PlayerController : NetworkBehaviour
     private void SubmitJumpServerRpc()
     {
         tryiedToJump = true;
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void InvokeSoundClientRpc()
+    {
+        audioSource.Play();
     }
 }
