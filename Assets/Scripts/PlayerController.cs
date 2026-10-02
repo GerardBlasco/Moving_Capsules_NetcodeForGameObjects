@@ -93,7 +93,7 @@ public class PlayerController : NetworkBehaviour
         if (Physics.Raycast(raycastPoint, transform.TransformDirection(Vector3.down), 0.5f))
         {
             Debug.DrawRay(raycastPoint, transform.TransformDirection(Vector3.down) * 0.5f, Color.yellow);
-            Debug.Log("Hit something");
+            //Debug.Log("Hit something");
             isGrounded = true;
         }
         else
