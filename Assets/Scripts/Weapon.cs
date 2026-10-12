@@ -13,6 +13,7 @@ public class Weapon : MonoBehaviour
     [SerializeField] GameObject projectile;
     [SerializeField] GameObject fakeProjectile;
     [SerializeField] Transform projectileSpawn;
+    [SerializeField] Transform smokeSpawn;
 
     bool canShoot = true;
 
@@ -29,7 +30,9 @@ public class Weapon : MonoBehaviour
 
         fakeProjectile.SetActive(false);
 
-        ParticleManager.instance.SpawnParticles("ShootingCloud", projectileSpawn.position, projectileSpawn.rotation);
+        ParticleManager.instance.SpawnParticles("RocketShootingEffect", projectileSpawn.position, projectileSpawn.rotation);
+        ParticleManager.instance.SpawnParticles("ShootingCloudBurst", smokeSpawn);
+
 
         ShootProjectile();
 

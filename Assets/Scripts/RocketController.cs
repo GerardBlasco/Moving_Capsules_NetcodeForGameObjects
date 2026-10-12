@@ -8,6 +8,8 @@ public class RocketController : NetworkBehaviour
     float speed = 20f;
     Rigidbody rb;
 
+    [SerializeField] ParticleSystem particles;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -40,7 +42,12 @@ public class RocketController : NetworkBehaviour
     {
         yield return new WaitForSeconds(timeToExplode);
 
+        particles.transform.SetParent(null);
+        particles.Stop();
+
         Destroy(gameObject);
         GetComponent<NetworkObject>().Despawn();
+
+        ParticleManager.instance.SpawnParticles("ExplosionEffect", transform.position, Quaternion.identity);
     }
 }
