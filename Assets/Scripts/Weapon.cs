@@ -7,7 +7,7 @@ using System.Linq;
 public class Weapon : MonoBehaviour
 {
     private float recoilForce = 30f;
-    private float cooldown = 2f;
+    private float cooldown = 1.3f;
     private Sequence shootAnimation;
 
     [SerializeField] GameObject projectile;
@@ -43,8 +43,7 @@ public class Weapon : MonoBehaviour
         shootAnimation.Join(transform.DOLocalMove(Vector3.zero, 0.2f));
         shootAnimation.AppendInterval(0.5f);
         shootAnimation.AppendCallback(() => PlayReloadAnimation());
-
-        StartCoroutine(ShootingCooldown());
+        shootAnimation.AppendCallback(() => StartCoroutine(ShootingCooldown()));
     }
 
     public void ShootProjectile()
@@ -102,7 +101,7 @@ public class Weapon : MonoBehaviour
 
         // Control del movimiento en el eje Y de la mano
         Sequence reloadAnimationY = DOTween.Sequence();
-        reloadAnimationY.Append(leftHand.transform.DOLocalMoveY(projectileSpawn.localPosition.y, 0.8f));
+        reloadAnimationY.Append(leftHand.transform.DOLocalMoveY(projectileSpawn.localPosition.y, 0.7f));
         reloadAnimationY.Append(leftHand.transform.DOLocalMoveY(leftHandOgPos.y, 0.5f));
     }
 

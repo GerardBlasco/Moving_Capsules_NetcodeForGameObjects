@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -22,13 +23,12 @@ public class RocketController : NetworkBehaviour
         if (IsServer)
         {
             rb.isKinematic = false;
+            StartCoroutine(AutomaticExplosionTimer());
         }
         else
         {
             rb.isKinematic = true;
         }
-
-        StartCoroutine(AutomaticExplosionTimer());
     }
 
     private void FixedUpdate()
@@ -42,12 +42,32 @@ public class RocketController : NetworkBehaviour
     {
         yield return new WaitForSeconds(timeToExplode);
 
+        DetonateRocket();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!IsServer) return;
+
+        DetonateRocket();
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ExplodeClientRpc(Vector3 position)
+    {
         particles.transform.SetParent(null);
         particles.Stop();
 
+        ParticleManager.instance.SpawnParticles("ExplosionEffect", position, Quaternion.identity);
+    }
+
+    private void DetonateRocket()
+    {
+        if (!IsServer) return;
+
+        ExplodeClientRpc(transform.position);
+
         Destroy(gameObject);
         GetComponent<NetworkObject>().Despawn();
-
-        ParticleManager.instance.SpawnParticles("ExplosionEffect", transform.position, Quaternion.identity);
     }
 }
