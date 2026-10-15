@@ -10,6 +10,7 @@ public class RocketController : NetworkBehaviour
     Rigidbody rb;
 
     [SerializeField] ParticleSystem particles;
+    [SerializeField] GameObject explosion;
 
     private void Awake()
     {
@@ -53,19 +54,20 @@ public class RocketController : NetworkBehaviour
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void ExplodeClientRpc(Vector3 position)
+    private void DetatchParticlesClientRpc()
     {
         particles.transform.SetParent(null);
         particles.Stop();
-
-        ParticleManager.instance.SpawnParticles("ExplosionEffect", position, Quaternion.identity);
     }
 
     private void DetonateRocket()
     {
         if (!IsServer) return;
 
-        ExplodeClientRpc(transform.position);
+        GameObject newExplosion = Instantiate(explosion, transform.position, Quaternion.identity);
+        newExplosion.GetComponent<NetworkObject>().Spawn();
+
+        DetatchParticlesClientRpc();
 
         Destroy(gameObject);
         GetComponent<NetworkObject>().Despawn();

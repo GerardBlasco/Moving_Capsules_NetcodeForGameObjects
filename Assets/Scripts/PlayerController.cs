@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -17,6 +18,10 @@ public class PlayerController : NetworkBehaviour
     private Rigidbody rb;
 
     private AudioSource audioSource;
+
+    private bool onKnockback;
+
+    bool isGrounded;
 
     private void Awake()
     {
@@ -75,7 +80,15 @@ public class PlayerController : NetworkBehaviour
         Vector3 moveDirection = new Vector3(inputVector.x, 0f, inputVector.y);
 
         Vector3 targetVelocity = moveDirection * speed;
-        rb.linearVelocity = new Vector3(targetVelocity.x, rb.linearVelocity.y, targetVelocity.z);
+
+        if (onKnockback)
+        {
+            rb.linearVelocity = rb.linearVelocity;
+        }
+        else
+        {
+            rb.linearVelocity = new Vector3(targetVelocity.x, rb.linearVelocity.y, targetVelocity.z);
+        }
 
         // Control de la rotación
         if (moveDirection.sqrMagnitude != 0f)
@@ -88,8 +101,7 @@ public class PlayerController : NetworkBehaviour
 
         // Control del estado de si el jugador esta en contacto con el suelo
         Vector3 raycastPoint = new Vector3(transform.position.x, transform.position.y - 0.6f, transform.position.z);
-        bool isGrounded;
-
+        
         if (Physics.Raycast(raycastPoint, transform.TransformDirection(Vector3.down), 0.5f))
         {
             Debug.DrawRay(raycastPoint, transform.TransformDirection(Vector3.down) * 0.5f, Color.yellow);
@@ -129,5 +141,30 @@ public class PlayerController : NetworkBehaviour
     private void InvokeSoundClientRpc()
     {
         audioSource.Play();
+    }
+
+    public void AddKnockback(Vector3 knockback, float knockbackDuration)
+    {
+        if (!IsServer) return;
+
+        onKnockback = true;
+        rb.linearVelocity = Vector3.zero;
+        rb.AddForce(knockback, ForceMode.Impulse);
+        StartCoroutine(KnockbackTimer(knockbackDuration));
+    }
+
+    public IEnumerator KnockbackTimer(float duration)
+    {
+        if (!isGrounded)
+        {
+            yield return new WaitUntil(() => isGrounded);
+            yield return new WaitForSeconds(duration * 0.2f);
+        }
+        else
+        {
+            yield return new WaitForSeconds(duration);
+        }
+        
+        onKnockback = false;
     }
 }

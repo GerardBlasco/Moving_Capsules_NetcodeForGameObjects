@@ -250,6 +250,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RocketController
   ShowTopMostFoldoutHeaderGroup: 1
   particles: {fileID: 7295060663265520048}
+  explosion: {fileID: 7750250285191973473, guid: a53973b4eda7ecc4494ffa3325b0a964, type: 3}
 --- !u!136 &1733887880572756195
 CapsuleCollider:
   m_ObjectHideFlags: 0

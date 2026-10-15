@@ -6,7 +6,7 @@ using System.Linq;
 
 public class Weapon : MonoBehaviour
 {
-    private float recoilForce = 30f;
+    private float recoilForce = 10f;
     private float cooldown = 1.3f;
     private Sequence shootAnimation;
 
@@ -32,7 +32,7 @@ public class Weapon : MonoBehaviour
 
         ParticleManager.instance.SpawnParticles("RocketShootingEffect", projectileSpawn.position, projectileSpawn.rotation);
         ParticleManager.instance.SpawnParticles("ShootingCloudBurst", smokeSpawn);
-
+        ParticleManager.instance.SpawnParticles("MainShootingImpact", projectileSpawn);
 
         ShootProjectile();
 
@@ -41,6 +41,7 @@ public class Weapon : MonoBehaviour
         shootAnimation.Join(transform.DOLocalMove(new Vector3(0, 0.5f, -1), 0.2f));
         shootAnimation.Append(transform.DOLocalRotate(Vector3.zero, 0.2f));
         shootAnimation.Join(transform.DOLocalMove(Vector3.zero, 0.2f));
+        shootAnimation.AppendCallback(() => ParticleManager.instance.SpawnParticles("ResidualSmoke", projectileSpawn));
         shootAnimation.AppendInterval(0.5f);
         shootAnimation.AppendCallback(() => PlayReloadAnimation());
         shootAnimation.AppendCallback(() => StartCoroutine(ShootingCooldown()));

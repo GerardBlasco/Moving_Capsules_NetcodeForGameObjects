@@ -14,15 +14,6 @@ public class ObstacleController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-
-        /*if (IsServer)
-        {
-            rb.isKinematic = false;
-        }
-        else
-        {
-            rb.isKinematic = true;
-        }*/
     }
 
     private void FixedUpdate()

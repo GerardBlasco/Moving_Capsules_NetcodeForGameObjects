@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 1007036408121538330}
   m_Layer: 2
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -363,6 +363,8 @@ MonoBehaviour:
   weaponPos: {fileID: 6389299808334134539}
   rightHand: {fileID: 8623590614305893976}
   leftHand: {fileID: 8361229054450479273}
+  flashDuration: 0.3
+  flashMaterial: {fileID: 2100000, guid: 62f9c302f56901a439b4b516d0712262, type: 2}
 --- !u!1 &728903384871153939
 GameObject:
   m_ObjectHideFlags: 0
