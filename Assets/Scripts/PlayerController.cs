@@ -167,4 +167,14 @@ public class PlayerController : NetworkBehaviour
         
         onKnockback = false;
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!IsServer) return;
+
+        if (other.transform.CompareTag("Player") && other.GetComponent<NetworkObject>())
+        {
+            //GrabObject(other.transform);
+        }
+    }
 }

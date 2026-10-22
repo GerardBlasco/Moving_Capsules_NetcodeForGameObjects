@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 
 public class PlayerCombat : NetworkBehaviour
@@ -13,6 +12,9 @@ public class PlayerCombat : NetworkBehaviour
     [SerializeField] GameObject weaponPrefab;
 
     [SerializeField] Transform weaponPos;
+    [SerializeField] Transform foldedWeaponPos;
+
+    private bool tryiedToAlterWeapon = false;
 
     private Weapon currentWeapon;
 
@@ -25,6 +27,11 @@ public class PlayerCombat : NetworkBehaviour
 
     [SerializeField] float flashDuration = 0.2f;
     [SerializeField] Material flashMaterial;
+
+    private readonly NetworkVariable<bool> weaponFolded = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
 
     private void Awake()
     {
@@ -48,6 +55,7 @@ public class PlayerCombat : NetworkBehaviour
         if (Keyboard.current != null)
         {
             if (Keyboard.current.fKey.wasPressedThisFrame) ShootServerRpc();
+            if (Keyboard.current.tabKey.wasPressedThisFrame) TryAlterWeaponServerRpc();
         }
     }
 
@@ -55,11 +63,29 @@ public class PlayerCombat : NetworkBehaviour
     {
         if (!IsServer) return;
 
+        if (tryiedToAlterWeapon)
+        {
+            tryiedToAlterWeapon = false;
+
+            if (!currentWeapon.GetCanShoot()) return;
+
+            //weaponFolded.Value ? UnfoldWeaponClientRpc() : FoldWeaponClientRpc();
+
+            if (weaponFolded.Value)
+            {
+                UnfoldWeaponClientRpc();
+            }
+            else
+            {
+                FoldWeaponClientRpc();
+            }
+        }
+
         if (shootWasPressed)
         {
             shootWasPressed = false;
 
-            if (!currentWeapon.GetCanShoot()) return;
+            if (!currentWeapon.GetCanShoot() || weaponFolded.Value) return;
 
             ShootAnimationClientRpc();
 
@@ -98,6 +124,28 @@ public class PlayerCombat : NetworkBehaviour
         {
             playerRenderers[i].material = ogMaterial;
         }
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void TryAlterWeaponServerRpc()
+    {
+        tryiedToAlterWeapon = true;
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void FoldWeaponClientRpc()
+    {
+        weaponFolded.Value = true;
+        weaponPrefab.transform.position = foldedWeaponPos.position;
+        weaponPrefab.transform.rotation = foldedWeaponPos.rotation;
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void UnfoldWeaponClientRpc()
+    {
+        weaponFolded.Value = false;
+        weaponPrefab.transform.position = weaponPos.position;
+        weaponPrefab.transform.rotation = weaponPos.rotation;
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
