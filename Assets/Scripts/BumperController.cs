@@ -23,6 +23,12 @@ public class BumperController : NetworkBehaviour
 
         collision.gameObject.GetComponent<PlayerController>().AddKnockback(bumpDirection * bumpForce, 0.8f);
 
+        PlayBumperAnimationClientRpc();
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void PlayBumperAnimationClientRpc()
+    {
         if (bumpSequence != null && bumpSequence.IsActive())
         {
             bumpSequence.Kill();

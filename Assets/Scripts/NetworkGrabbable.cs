@@ -4,6 +4,7 @@ using Unity.Netcode;
 public class NetworkGrabbable : NetworkBehaviour
 {
     Rigidbody rb;
+    [SerializeField] Canvas proximityIcon;
 
     private readonly NetworkVariable<bool> isGrabbed = new NetworkVariable<bool>(
         false,
@@ -35,11 +36,33 @@ public class NetworkGrabbable : NetworkBehaviour
 
         if (other.transform.CompareTag("Player") && other.GetComponent<NetworkObject>())
         {
-            GrabObject(other.GetComponent<NetworkObject>().OwnerClientId, other.transform);
+            ToggleProximityIconClientRpc(true, RpcParamsToSingleClient(other.GetComponent<NetworkObject>().OwnerClientId));
         }
     }
 
-    private void GrabObject(ulong clientID, Transform parent)
+    private void OnTriggerExit(Collider other)
+    {
+        if (!IsServer) return;
+
+        if (other.transform.CompareTag("Player") && other.GetComponent<NetworkObject>())
+        {
+            ToggleProximityIconClientRpc(false, RpcParamsToSingleClient(other.GetComponent<NetworkObject>().OwnerClientId));
+        }
+    }
+
+    private ClientRpcParams RpcParamsToSingleClient(ulong targetClientId)
+    {
+        ulong[] target = new ulong[1];
+
+        target[0] = targetClientId;
+
+        ClientRpcParams rpcParams = new ClientRpcParams();
+        rpcParams.Send.TargetClientIds = target;
+
+        return rpcParams;
+    }
+
+    public void GrabObject(ulong clientID, Transform parent, Vector3 grabbedPos)
     {
         if (isGrabbed.Value) return;
 
@@ -48,9 +71,12 @@ public class NetworkGrabbable : NetworkBehaviour
         NetworkObject.ChangeOwnership(clientID);
         Debug.Log($"[RED] El objeto '{name}' ahora tiene de owner a '{clientID}'.");
 
-        transform.localPosition = new Vector3(0, 0, 1.5f);
+        transform.localPosition = grabbedPos;
         rb.isKinematic = true;
         isGrabbed.Value = true;
+
+        proximityIcon.gameObject.SetActive(false);
+        //ToggleProximityIconClientRpc(false, RpcParamsToSingleClient(clientID));
 
         if (!parentedSuccessfully)
         {
@@ -58,7 +84,15 @@ public class NetworkGrabbable : NetworkBehaviour
             rb.isKinematic = false;
             isGrabbed.Value = false;
 
+            ToggleProximityIconClientRpc(true, RpcParamsToSingleClient(clientID));
+
             return;
         }
+    }
+
+    [ClientRpc]
+    private void ToggleProximityIconClientRpc(bool value, ClientRpcParams rpcParams = default)
+    {
+        proximityIcon.gameObject.SetActive(value);
     }
 }

@@ -15,6 +15,8 @@ public class PlayerController : NetworkBehaviour
 
     private bool tryiedToJump;
 
+    private bool tryiedToGrabItem;
+
     private Rigidbody rb;
 
     private AudioSource audioSource;
@@ -57,6 +59,11 @@ public class PlayerController : NetworkBehaviour
             if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) horizontal += 1f;
             if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) vertical -= 1f;
             if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) vertical += 1f;
+
+            if (Keyboard.current.eKey.wasPressedThisFrame)
+            {
+                SubmitGrabServerRpc();
+            }
 
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
             {
@@ -120,7 +127,9 @@ public class PlayerController : NetworkBehaviour
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             InvokeSoundClientRpc();
         }
+
         tryiedToJump = false;
+        
     }
 
     // El server recibe la dirección pedida por el cliente
@@ -135,6 +144,12 @@ public class PlayerController : NetworkBehaviour
     private void SubmitJumpServerRpc()
     {
         tryiedToJump = true;
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void SubmitGrabServerRpc()
+    {
+        tryiedToGrabItem = true;
     }
 
     [Rpc(SendTo.ClientsAndHost)]
@@ -168,13 +183,17 @@ public class PlayerController : NetworkBehaviour
         onKnockback = false;
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if (!IsServer) return;
 
-        if (other.transform.CompareTag("Player") && other.GetComponent<NetworkObject>())
+        if (other.transform.CompareTag("Grabbable") && other.GetComponent<NetworkObject>() && tryiedToGrabItem)
         {
-            //GrabObject(other.transform);
+            tryiedToGrabItem = false;
+
+            NetworkGrabbable grabbable = other.GetComponent<NetworkGrabbable>();
+
+            grabbable.GrabObject(GetComponent<NetworkObject>().OwnerClientId, transform, new Vector3(0, 0, 1.5f));
         }
     }
 }
