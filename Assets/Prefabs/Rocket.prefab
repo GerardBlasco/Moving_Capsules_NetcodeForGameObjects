@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6728147231714903706}
   - component: {fileID: 6107838891965661249}
   - component: {fileID: 2910665254022398176}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cylinder (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -104,7 +104,7 @@ GameObject:
   - component: {fileID: 6707639614041992221}
   - component: {fileID: 7523111184644689307}
   - component: {fileID: 1733887880572756195}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Rocket
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -285,7 +285,7 @@ GameObject:
   - component: {fileID: 7279879523676836994}
   - component: {fileID: 5825838092602032696}
   - component: {fileID: 3728362461329022678}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cylinder (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -375,7 +375,7 @@ GameObject:
   - component: {fileID: 6250879118864313631}
   - component: {fileID: 6496361039901332769}
   - component: {fileID: 9133193137607519385}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cylinder (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -465,7 +465,7 @@ GameObject:
   - component: {fileID: 7347010994102992593}
   - component: {fileID: 9202612009263042532}
   - component: {fileID: 2484905136027130342}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -555,7 +555,7 @@ GameObject:
   - component: {fileID: 3691206549081398285}
   - component: {fileID: 4221263772719657120}
   - component: {fileID: 4687337114217041821}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Sphere (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -645,7 +645,7 @@ GameObject:
   - component: {fileID: 3129306221757136885}
   - component: {fileID: 4628507934065993101}
   - component: {fileID: 3856508779980975199}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cylinder (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -735,7 +735,7 @@ GameObject:
   - component: {fileID: 2970601112538575569}
   - component: {fileID: 1405295180115705826}
   - component: {fileID: 3138931466966756691}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Sphere (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -825,7 +825,7 @@ GameObject:
   - component: {fileID: 4311985466593829448}
   - component: {fileID: 184828093243259722}
   - component: {fileID: 7524540443684363341}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cylinder (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -968,6 +968,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SmokeTrail
       objectReference: {fileID: 0}
+    - target: {fileID: 6941617117665125904, guid: 36d720006d0e4724097777b8a77dcfe1, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1034,6 +1038,10 @@ PrefabInstance:
     - target: {fileID: 7845044192931505895, guid: 6efb29b729bc8ed45be3ffa022e97622, type: 3}
       propertyPath: m_Name
       value: RocketBurst
+      objectReference: {fileID: 0}
+    - target: {fileID: 7845044192931505895, guid: 6efb29b729bc8ed45be3ffa022e97622, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

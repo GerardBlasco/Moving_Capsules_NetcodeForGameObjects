@@ -13,6 +13,7 @@ public class PlayerCombat : NetworkBehaviour
 
     [SerializeField] Transform weaponPos;
     [SerializeField] Transform foldedWeaponPos;
+    [SerializeField] Transform handsParent;
 
     private bool tryiedToAlterWeapon = false;
 
@@ -32,6 +33,15 @@ public class PlayerCombat : NetworkBehaviour
         false,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server);
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        weaponFolded.OnValueChanged += OnWeaponFoldedChanged;
+
+        OnWeaponFoldedChanged(false, weaponFolded.Value);
+    }
 
     private void Awake()
     {
@@ -73,11 +83,11 @@ public class PlayerCombat : NetworkBehaviour
 
             if (weaponFolded.Value)
             {
-                UnfoldWeaponClientRpc();
+                weaponFolded.Value = false;
             }
             else
             {
-                FoldWeaponClientRpc();
+                weaponFolded.Value = true;
             }
         }
 
@@ -135,6 +145,7 @@ public class PlayerCombat : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     private void FoldWeaponClientRpc()
     {
+        currentWeapon.UnparentHands(handsParent);
         weaponFolded.Value = true;
         weaponPrefab.transform.position = foldedWeaponPos.position;
         weaponPrefab.transform.rotation = foldedWeaponPos.rotation;
@@ -158,5 +169,30 @@ public class PlayerCombat : NetworkBehaviour
     private void ShootAnimationClientRpc()
     {
         currentWeapon.PlayShootAnimation();
+    }
+
+    private void FoldWeaponVisual()
+    {
+        currentWeapon.UnparentHands(handsParent);
+        weaponPrefab.transform.position = foldedWeaponPos.position;
+        weaponPrefab.transform.rotation = foldedWeaponPos.rotation;
+    }
+
+    private void UnfoldWeaponVisual()
+    {
+        weaponPrefab.transform.position = weaponPos.position;
+        weaponPrefab.transform.rotation = weaponPos.rotation;
+    }
+
+    private void OnWeaponFoldedChanged(bool previous, bool current)
+    {
+        if (current)
+        {
+            FoldWeaponVisual();
+        }
+        else
+        {
+            UnfoldWeaponVisual();
+        }
     }
 }

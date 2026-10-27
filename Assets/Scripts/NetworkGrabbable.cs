@@ -1,10 +1,13 @@
 using UnityEngine;
 using Unity.Netcode;
+using DG.Tweening;
 
 public class NetworkGrabbable : NetworkBehaviour
 {
     Rigidbody rb;
     [SerializeField] Canvas proximityIcon;
+    private Tween shakeTween;
+    private Vector3 initialPos;
 
     private readonly NetworkVariable<bool> isGrabbed = new NetworkVariable<bool>(
         false,
@@ -19,6 +22,8 @@ public class NetworkGrabbable : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+
+        isGrabbed.OnValueChanged += OnGrabbedChange;
 
         if (IsServer)
         {
@@ -66,6 +71,8 @@ public class NetworkGrabbable : NetworkBehaviour
     {
         if (isGrabbed.Value) return;
 
+        Debug.Log($"Objeto agarrado por {clientID}");
+
         bool parentedSuccessfully = NetworkObject.TrySetParent(parent.transform, false);
 
         NetworkObject.ChangeOwnership(clientID);
@@ -74,9 +81,6 @@ public class NetworkGrabbable : NetworkBehaviour
         transform.localPosition = grabbedPos;
         rb.isKinematic = true;
         isGrabbed.Value = true;
-
-        proximityIcon.gameObject.SetActive(false);
-        //ToggleProximityIconClientRpc(false, RpcParamsToSingleClient(clientID));
 
         if (!parentedSuccessfully)
         {
@@ -90,9 +94,48 @@ public class NetworkGrabbable : NetworkBehaviour
         }
     }
 
+    public void DropObject()
+    {
+        NetworkObject.TryRemoveParent();
+        NetworkObject.RemoveOwnership();
+
+        rb.isKinematic = false;
+        isGrabbed.Value = false;
+    }
+
+    public Rigidbody GetRigidBody()
+    {
+        return rb;
+    }
+
     [ClientRpc]
     private void ToggleProximityIconClientRpc(bool value, ClientRpcParams rpcParams = default)
     {
         proximityIcon.gameObject.SetActive(value);
+    }
+
+    private void OnGrabbedChange(bool prevState, bool currentState)
+    {
+        if (currentState)
+        {
+            proximityIcon.enabled = false;
+        } else
+        {
+            proximityIcon.enabled = true;
+        }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void StartShakeClientRpc()
+    {
+        initialPos = transform.localPosition;
+        shakeTween = transform.DOShakePosition(999f, 0.1f, 30, 90, false, false);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void StopShakeClientRpc()
+    {
+        shakeTween.Kill();
+        transform.localPosition = initialPos;
     }
 }

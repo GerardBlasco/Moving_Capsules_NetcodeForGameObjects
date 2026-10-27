@@ -16,6 +16,12 @@ public class PlayerController : NetworkBehaviour
     private bool tryiedToJump;
 
     private bool tryiedToGrabItem;
+    private bool tryiedToThrowItem;
+    private bool preparingToThrow;
+
+    [SerializeField] private float minThrowPower = 1f;
+    [SerializeField] private float maxThrowPower = 20f;
+    private float throwPowerChargeSpeed = 10f;
 
     private Rigidbody rb;
 
@@ -24,6 +30,10 @@ public class PlayerController : NetworkBehaviour
     private bool onKnockback;
 
     bool isGrounded;
+
+    NetworkGrabbable grabbable;
+
+    [SerializeField] Transform grabbablePivot;
 
     private void Awake()
     {
@@ -62,8 +72,10 @@ public class PlayerController : NetworkBehaviour
 
             if (Keyboard.current.eKey.wasPressedThisFrame)
             {
-                SubmitGrabServerRpc();
+                InteractServerRpc();
             }
+
+            SubmitThrowPreparationServerRpc(Keyboard.current.eKey.isPressed);
 
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
             {
@@ -129,7 +141,12 @@ public class PlayerController : NetworkBehaviour
         }
 
         tryiedToJump = false;
-        
+
+        if (tryiedToThrowItem)
+        {
+            tryiedToThrowItem = false;
+            StartCoroutine(DynamicThrow());
+        }
     }
 
     // El server recibe la dirección pedida por el cliente
@@ -146,10 +163,23 @@ public class PlayerController : NetworkBehaviour
         tryiedToJump = true;
     }
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    /*[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void SubmitGrabServerRpc()
     {
         tryiedToGrabItem = true;
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void SubmitThrowServerRpc()
+    {
+        Debug.Log("THROW RPC");
+        tryiedToThrowItem = true;
+    }*/
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void SubmitThrowPreparationServerRpc(bool value)
+    {
+        preparingToThrow = value;
     }
 
     [Rpc(SendTo.ClientsAndHost)]
@@ -191,9 +221,62 @@ public class PlayerController : NetworkBehaviour
         {
             tryiedToGrabItem = false;
 
-            NetworkGrabbable grabbable = other.GetComponent<NetworkGrabbable>();
+            grabbable = other.GetComponent<NetworkGrabbable>();
 
             grabbable.GrabObject(GetComponent<NetworkObject>().OwnerClientId, transform, new Vector3(0, 0, 1.5f));
+        }
+    }
+
+    private void ThrowGrabbable(float throwPower)
+    {
+        grabbable.DropObject();
+        grabbable.GetRigidBody().AddForce((grabbable.transform.position - transform.position).normalized * throwPower, ForceMode.Impulse);
+        grabbable = null;
+    }
+
+    public IEnumerator DynamicThrow()
+    {
+        //yield return new WaitUntil(() => !preparingToThrow);
+
+        float throwPower = minThrowPower;
+
+        grabbable.StartShakeClientRpc();
+
+        while (preparingToThrow)
+        {
+            throwPower += throwPowerChargeSpeed * Time.deltaTime;
+            throwPower = Mathf.Clamp(throwPower, minThrowPower, maxThrowPower);
+
+            Debug.Log("Current throw power: " + throwPower);
+
+            yield return null;
+        }
+
+        grabbable.StopShakeClientRpc();
+        ThrowGrabbable(throwPower);
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void InteractServerRpc()
+    {
+        if (grabbable != null)
+        {
+            tryiedToThrowItem = true;
+        }
+        else
+        {
+            tryiedToGrabItem = true;
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+
+        if (grabbable)
+        {
+            grabbable.DropObject();
+            grabbable.transform.position = transform.position;
         }
     }
 }

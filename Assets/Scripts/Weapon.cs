@@ -112,6 +112,12 @@ public class Weapon : MonoBehaviour
         fakeProjectile.transform.position = newParent.position;
     }
 
+    public void UnparentHands(Transform handsParent)
+    {
+        rightHand.transform.parent = handsParent;
+        leftHand.transform.parent = handsParent;
+    }
+
     public void SetPlayerHands(GameObject rightHand, GameObject leftHand)
     {
         this.rightHand = rightHand;

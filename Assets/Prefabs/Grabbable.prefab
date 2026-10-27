@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6560724747039790423}
   - component: {fileID: 5812364234775316352}
   - component: {fileID: 3360334399594628232}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 3723079027040795433}
   - component: {fileID: 647927876248099255}
   - component: {fileID: -4263299852251547422}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Grabbable
   m_TagString: Grabbable
   m_Icon: {fileID: 0}
@@ -277,7 +277,7 @@ MonoBehaviour:
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
+  DontDestroyWithOwner: 1
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
@@ -379,7 +379,7 @@ GameObject:
   - component: {fileID: 5583715129557191488}
   - component: {fileID: 8920604217655124256}
   - component: {fileID: 6975918977586169611}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
